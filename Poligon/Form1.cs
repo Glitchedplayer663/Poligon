@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -21,6 +21,10 @@ namespace PoligonceProjekat
         private System.Windows.Forms.Button btnSnimiPoligon;
         private System.Windows.Forms.Button btnProvera;
         private ListBox lstTacke;
+        private System.Windows.Forms.Button btnFizika;
+        private System.Windows.Forms.Label lblPovrš;
+        private System.Windows.Forms.Label lblCentar;
+        private System.Windows.Forms.Label lblMomenat;
         public Form1()
         {
             InitializeComponent();
@@ -31,9 +35,14 @@ namespace PoligonceProjekat
             btnDodaj.Click += BtnDodaj_Click;
             btnIzracunaj.Click += BtnIzracunaj_Click;
             btnOcisti.Click += BtnCiscenje_Click;
+            btnFizika.Click += BtnFizika_Click;
         }
         private void InitializeComponent()
         {
+            this.btnFizika = new System.Windows.Forms.Button() { Location = new Point(20, 260), Text = "Fizikališi" }; // Ovo dugme ce ičunati sve vezano za fiziku
+            this.lblPovrš = new System.Windows.Forms.Label() { Location = new Point(240, 260), Size = new Size(300, 20), Text = "Površina: " };
+            this.lblCentar = new System.Windows.Forms.Label() { Location = new Point(240, 280), Size = new Size(300, 20), Text = "Težište: " };
+            this.lblMomenat = new System.Windows.Forms.Label() { Location = new Point(240, 300), Size = new Size(300, 20), Text = "Moment inercije: " };
             this.btnUcitajPoligon = new System.Windows.Forms.Button() { Location = new Point(260, 60), Text = "Učitaj" };
             this.btnProvera = new System.Windows.Forms.Button() { Location = new Point(380, 20), Text = "Provera tačke" };
             this.btnSnimiPoligon = new System.Windows.Forms.Button() { Location = new Point(380, 60), Text = "Snimi" };
@@ -66,6 +75,10 @@ namespace PoligonceProjekat
             this.Controls.Add(btnSnimiPoligon);
             this.Controls.Add(lstTacke);
             this.Controls.Add(txtRezultat);
+            this.Controls.Add(btnFizika);
+            this.Controls.Add(lblPovrš);
+            this.Controls.Add(lblCentar);
+            this.Controls.Add(lblMomenat);
 
             this.Text = "Poligon Projekat";
         }
@@ -146,6 +159,20 @@ namespace PoligonceProjekat
             txtY.Clear();
             txtX.Focus();
             Invalidate();
+        }
+        private void BtnFizika_Click(object sender, EventArgs e)
+        {
+            if (omotac == null || omotac.Count < 3)
+            {
+                MessageBox.Show("Poligon nije izračunat ili nema dovoljno tačaka za izračun fizike.", "Greška");
+                return;
+            }
+
+            var rezultat = Tačka.IzracunajTezisteIMoment(omotac);
+
+            lblPovrš.Text = $"Površina: {rezultat.Area:F4}";
+            lblCentar.Text = $"Težište: ({rezultat.Cx:F4}, {rezultat.Cy:F4})";
+            lblMomenat.Text = $"Moment inercije: {rezultat.MomentInercije:F4}";
         }
         private void BtnUcitajPoligon_Click(object sender, EventArgs e)
         {
