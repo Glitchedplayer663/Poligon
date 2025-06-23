@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -177,37 +177,58 @@ namespace PoligonceProjekat
         {
             int n = poligon.Count;
             double A = 0, Cx = 0, Cy = 0, Iz = 0;
-            double rho = 1;
+            double rho = 1; // Gustina (pretpostavimo 1 za jednostavnost)
+
+            // 1) Računanje površine (formula pertlanja)
+            // delimično sumiranje za koordinate težišta
             for (int i = 0; i < n; i++)
             {
                 double xi = poligon[i].X;
                 double yi = poligon[i].Y;
-                double xi1 = poligon[(i + 1) % n].X;
+                double xi1 = poligon[(i + 1) % n].X; // sledeća tačka (ciklički)
                 double yi1 = poligon[(i + 1) % n].Y;
+
+                // Doprinos za površinu (determinanta)
                 double faktor = xi * yi1 - xi1 * yi;
                 A += faktor;
+
+                // Doprinos za težište (centroid)
                 Cx += (xi + xi1) * faktor;
                 Cy += (yi + yi1) * faktor;
             }
+
+            // Konačna površina (polovina determinante)
             A = A / 2.0;
+
+            // Konačne koordinate težišta (centroid)
             Cx = Cx / (6.0 * A);
             Cy = Cy / (6.0 * A);
+
+            // Računanje momenta inercije oko ose OZ
+            // Formula: Iz = (rho/12) * sum[(xi*yi+1 - xi+1*yi) * ((xi-Cx)^2 + (xi-Cx)*(xi+1-Cx) + (xi+1-Cx)^2 + isto za Y)]
             for (int i = 0; i < n; i++)
             {
                 double xi = poligon[i].X;
                 double yi = poligon[i].Y;
                 double xi1 = poligon[(i + 1) % n].X;
                 double yi1 = poligon[(i + 1) % n].Y;
-                double faktor = xi * yi1 - xi1 * yi;
+                double faktor = xi * yi1 - xi1 * yi;// Doprinos za determinantu
+                // Računanje kvadratnih i mešovitih termina za X i Y u odnosu na težište
                 double termX = (xi - Cx) * (xi - Cx) + (xi - Cx) * (xi1 - Cx) + (xi1 - Cx) * (xi1 - Cx);
                 double termY = (yi - Cy) * (yi - Cy) + (yi - Cy) * (yi1 - Cy) + (yi1 - Cy) * (yi1 - Cy);
-                Iz += faktor * (termX + termY);
+                Iz += faktor * (termX + termY);// Ukupno doprinosi za moment inercije (oko OZ ose)
             }
-            Iz = Math.Abs(rho * Iz / 12.0);
-            return new TezišteMomentInercije { Area = Math.Abs(A), Cx = Cx, Cy = Cy, MomentInercije = Iz };
+            Iz = Math.Abs(rho * Iz / 12.0);// Konačni moment inercije (apsolutna vrednost zbog orijentacije)
+            return new TezišteMomentInercije // Vraćanje rezultata: površina, koordinate težišta, moment inercije
+            {
+                Area = Math.Abs(A), // uvek pozitivna površina
+                Cx = Cx,
+                Cy = Cy,
+                MomentInercije = Iz
+            };
         }
-    }
-    static class Program
+        }
+        static class Program
     {
         [STAThread]
         static void Main()
