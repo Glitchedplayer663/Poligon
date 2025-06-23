@@ -166,6 +166,46 @@ namespace PoligonceProjekat
         {
             return Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
         }
+        public class TezišteMomentInercije
+        {
+            public double Area { get; set; }
+            public double Cx { get; set; }
+            public double Cy { get; set; }
+            public double MomentInercije { get; set; }
+        }
+        public static TezišteMomentInercije IzracunajTezisteIMoment(List<Tačka> poligon)
+        {
+            int n = poligon.Count;
+            double A = 0, Cx = 0, Cy = 0, Iz = 0;
+            double rho = 1;
+            for (int i = 0; i < n; i++)
+            {
+                double xi = poligon[i].X;
+                double yi = poligon[i].Y;
+                double xi1 = poligon[(i + 1) % n].X;
+                double yi1 = poligon[(i + 1) % n].Y;
+                double faktor = xi * yi1 - xi1 * yi;
+                A += faktor;
+                Cx += (xi + xi1) * faktor;
+                Cy += (yi + yi1) * faktor;
+            }
+            A = A / 2.0;
+            Cx = Cx / (6.0 * A);
+            Cy = Cy / (6.0 * A);
+            for (int i = 0; i < n; i++)
+            {
+                double xi = poligon[i].X;
+                double yi = poligon[i].Y;
+                double xi1 = poligon[(i + 1) % n].X;
+                double yi1 = poligon[(i + 1) % n].Y;
+                double faktor = xi * yi1 - xi1 * yi;
+                double termX = (xi - Cx) * (xi - Cx) + (xi - Cx) * (xi1 - Cx) + (xi1 - Cx) * (xi1 - Cx);
+                double termY = (yi - Cy) * (yi - Cy) + (yi - Cy) * (yi1 - Cy) + (yi1 - Cy) * (yi1 - Cy);
+                Iz += faktor * (termX + termY);
+            }
+            Iz = Math.Abs(rho * Iz / 12.0);
+            return new TezišteMomentInercije { Area = Math.Abs(A), Cx = Cx, Cy = Cy, MomentInercije = Iz };
+        }
     }
     static class Program
     {
