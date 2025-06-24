@@ -15,7 +15,25 @@ namespace PoligonceProjekat
             X = x;
             Y = y;
         }
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+                return false;
 
+            Tačka t = (Tačka)obj;
+            return Math.Abs(X - t.X) < 1e-9 && Math.Abs(Y - t.Y) < 1e-9;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + X.GetHashCode();
+                hash = hash * 23 + Y.GetHashCode();
+                return hash;
+            }
+        }
         public static List<Tačka> Umotavanje(List<Tačka> tacke)
         {
             if (tacke.Count < 3) return new List<Tačka>(tacke);
@@ -33,10 +51,10 @@ namespace PoligonceProjekat
                 Tačka next = tacke[0];
                 foreach (var p in tacke)
                 {
-                    if (p == trenutni) continue;
+                    if (p.Equals(trenutni)) continue;
 
                     double cross = (next.X - trenutni.X) * (p.Y - trenutni.Y) - (next.Y - trenutni.Y) * (p.X - trenutni.X);
-                    if (next == trenutni || cross < 0 ||
+                    if (next.Equals(trenutni) || cross < 0 ||
                         (cross == 0 && Distanca(trenutni, p) > Distanca(trenutni, next)))
                     {
                         next = p;
@@ -54,14 +72,22 @@ namespace PoligonceProjekat
             {
                 Tačka A = poligon[i];
                 Tačka B = poligon[(i + 1) % n];
+
                 for (int j = i + 1; j < n; j++)
                 {
                     Tačka C = poligon[j];
                     Tačka D = poligon[(j + 1) % n];
-                    if (A == C || A == D || B == C || B == D)
-                        continue;
+                    if (i == j ||
+                        (i + 1) % n == j ||
+                        i == (j + 1) % n)
+                        if (i == j) continue;
+                    if ((i + 1) % n == j || (j + 1) % n == i) continue;
+
                     if (JelSeSece(A, B, C, D))
+                    {
+                        Console.WriteLine($"Edges ({i},{(i + 1) % n}) and ({j},{(j + 1) % n}) intersect.");
                         return false;
+                    }
                 }
             }
             return true;
@@ -145,7 +171,7 @@ namespace PoligonceProjekat
         {
             double dx = a.X - b.X;
             double dy = a.Y - b.Y;
-            return dx * dx + dy * dy;
+            return Math.Sqrt(dx * dx + dy * dy);
         }
         public static bool JelSeSece(Tačka p1, Tačka p2, Tačka q1, Tačka q2)
         {
@@ -158,7 +184,7 @@ namespace PoligonceProjekat
         }
         public static int OrijentisiSe(Tačka a, Tačka b, Tačka c)
         {
-            double val = (b.Y - a.Y) * (c.X - b.X) - (b.X - a.X) * (c.Y - b.Y);
+            double val = (b.X - a.X) * (c.Y - a.Y) - (b.Y - a.Y) * (c.X - a.X);
             if (Math.Abs(val) < 1e-9) return 0;
             return val > 0 ? 1 : 2;
         }
@@ -239,3 +265,4 @@ namespace PoligonceProjekat
         }
     }
 }
+
