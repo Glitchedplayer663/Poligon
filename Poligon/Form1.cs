@@ -151,12 +151,12 @@ namespace PoligonceProjekat
         }
         private void BtnCiscenje_Click(object sender, EventArgs e)
         {
-            tacke.Clear();
             omotac = null;
             lstTacke.Items.Clear();
             txtRezultat.Clear();
             txtX.Clear();
             txtY.Clear();
+            tacke.Clear();
             txtX.Focus();
             Invalidate();
         }
@@ -222,13 +222,29 @@ namespace PoligonceProjekat
         {
             base.OnPaint(e);
             Graphics g = e.Graphics;
-            float offsetX = 350f;
-            float offsetY = 250f;
-            float scale = 20f;
+            if (tacke.Count == 0) return;
+            double minX = double.MaxValue, maxX = double.MinValue;
+            double minY = double.MaxValue, maxY = double.MinValue;
             foreach (var t in tacke)
             {
-                float px = (float)t.X * scale + offsetX;
-                float py = (float)t.Y * scale + offsetY;
+                if (t.X < minX) minX = t.X;
+                if (t.X > maxX) maxX = t.X;
+                if (t.Y < minY) minY = t.Y;
+                if (t.Y > maxY) maxY = t.Y;
+            }
+            double width = maxX - minX;
+            double height = maxY - minY;
+            float maxDrawWidth = 300f;
+            float maxDrawHeight = 200f;
+            float scaleX = width > 0 ? maxDrawWidth / (float)width : 1f;
+            float scaleY = height > 0 ? maxDrawHeight / (float)height : 1f;
+            float scale = Math.Min(scaleX, scaleY);
+            float offsetX = 600f + (maxDrawWidth - (float)width * scale) / 2f;
+            float offsetY = 300f + (maxDrawHeight - (float)height * scale) / 2f;
+            foreach (var t in tacke)
+            {
+                float px = (float)(t.X - minX) * scale + offsetX;
+                float py = (float)(t.Y - minY) * scale + offsetY;
                 g.FillEllipse(Brushes.Blue, px - 4, py - 4, 8, 8);
             }
             if (tacke.Count > 1)
@@ -236,7 +252,7 @@ namespace PoligonceProjekat
                 PointF[] polyPoints = new PointF[tacke.Count];
                 for (int i = 0; i < tacke.Count; i++)
                 {
-                    polyPoints[i] = new PointF((float)tacke[i].X * scale + offsetX, (float)tacke[i].Y * scale + offsetY);
+                    polyPoints[i] = new PointF((float)(tacke[i].X - minX) * scale + offsetX, (float)(tacke[i].Y - minY) * scale + offsetY);
                 }
                 g.DrawPolygon(Pens.Gray, polyPoints);
             }
@@ -245,9 +261,12 @@ namespace PoligonceProjekat
                 PointF[] hullPoints = new PointF[omotac.Count];
                 for (int i = 0; i < omotac.Count; i++)
                 {
-                    hullPoints[i] = new PointF((float)omotac[i].X * scale + offsetX, (float)omotac[i].Y * scale + offsetY);
+                    hullPoints[i] = new PointF((float)(omotac[i].X - minX) * scale + offsetX, (float)(omotac[i].Y - minY) * scale + offsetY);
                 }
-                g.DrawPolygon(new Pen(Color.Red, 2), hullPoints);
+                using (Pen pen = new Pen(Color.Red, 2))
+                {
+                    g.DrawPolygon(pen, hullPoints);
+                }
                 using (Brush brush = new SolidBrush(Color.FromArgb(60, Color.Red)))
                 {
                     g.FillPolygon(brush, hullPoints);
