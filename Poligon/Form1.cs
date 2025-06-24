@@ -134,7 +134,7 @@ namespace PoligonceProjekat
                 return;
             }
             omotac = Tačka.Umotavanje(tacke);
-            bool prost = Tačka.JelTeProst(omotac);
+            bool prost = Tačka.JelTeProst(tacke);
             double obim = Tačka.Perimetar(omotac);
             double povrsina = prost ? Tačka.Povrsina(omotac) : 0;
             txtRezultat.Clear();
@@ -240,7 +240,7 @@ namespace PoligonceProjekat
             float scaleY = height > 0 ? maxDrawHeight / (float)height : 1f;
             float scale = Math.Min(scaleX, scaleY);
             float offsetX = 600f + (maxDrawWidth - (float)width * scale) / 2f;
-            float offsetY = 300f + (maxDrawHeight - (float)height * scale) / 2f;
+            float offsetY = 60f + (maxDrawHeight - (float)height * scale) / 2f;
             foreach (var t in tacke)
             {
                 float px = (float)(t.X - minX) * scale + offsetX;
