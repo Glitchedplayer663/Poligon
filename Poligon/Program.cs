@@ -41,27 +41,43 @@ namespace PoligonceProjekat
             Tačka leva = tacke[0];
             foreach (var p in tacke)
             {
-                if (p.X < leva.X || (p.X == leva.X && p.Y < leva.Y))
+                if (p.X < leva.X || (Math.Abs(p.X - leva.X) < 1e-9 && p.Y < leva.Y))
                     leva = p;
             }
+
             Tačka trenutni = leva;
+
             do
             {
                 omotac.Add(trenutni);
-                Tačka next = tacke[0];
+                Tačka next = null;
+
                 foreach (var p in tacke)
                 {
                     if (p.Equals(trenutni)) continue;
 
+                    if (next == null)
+                    {
+                        next = p;
+                        continue;
+                    }
+
                     double cross = (next.X - trenutni.X) * (p.Y - trenutni.Y) - (next.Y - trenutni.Y) * (p.X - trenutni.X);
-                    if (next.Equals(trenutni) || cross < 0 ||
-                        (cross == 0 && Distanca(trenutni, p) > Distanca(trenutni, next)))
+
+                    if (cross < -1e-9)
                     {
                         next = p;
                     }
+                    else if (Math.Abs(cross) < 1e-9)
+                    {
+                        if (Distanca(trenutni, p) > Distanca(trenutni, next))
+                            next = p;
+                    }
                 }
+
                 trenutni = next;
-            } while (trenutni != leva);
+
+            } while (!trenutni.Equals(leva));
 
             return omotac;
         }
@@ -75,13 +91,10 @@ namespace PoligonceProjekat
 
                 for (int j = i + 1; j < n; j++)
                 {
+                    if (j == i || j == (i + 1) % n || (j + 1) % n == i) continue;
+
                     Tačka C = poligon[j];
                     Tačka D = poligon[(j + 1) % n];
-                    if (i == j ||
-                        (i + 1) % n == j ||
-                        i == (j + 1) % n)
-                        if (i == j) continue;
-                    if ((i + 1) % n == j || (j + 1) % n == i) continue;
 
                     if (JelSeSece(A, B, C, D))
                     {
@@ -265,4 +278,5 @@ namespace PoligonceProjekat
         }
     }
 }
+
 
